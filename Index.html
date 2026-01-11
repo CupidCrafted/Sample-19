@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scratch for a Surprise! ✨</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #E0B0FF; /* Lilac */
+            font-family: 'Georgia', serif;
+            touch-action: none; /* Crucial for mobile scratching */
+            overflow: hidden;
+        }
+
+        h2 { color: white; margin-bottom: 20px; text-shadow: 1px 1px 4px rgba(0,0,0,0.2); }
+
+        #scratch-container {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: 4px solid white;
+        }
+
+        /* THE REVEAL CONTENT */
+        #prize {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #fff;
+        }
+
+        #prize h3 { color: #8A2BE2; margin: 0; font-size: 1.1rem; }
+        #prize p { color: #D4AF37; font-weight: bold; font-size: 1.6rem; margin: 5px 0; }
+        #prize span { font-size: 0.9rem; color: #777; }
+
+        /* THE SCRATCH LAYER */
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        #successMessage {
+            display: none;
+            margin-top: 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Scratch to reveal your gift! ✨</h2>
+
+    <div id="scratch-container">
+        <div id="prize">
+            <h3>VALENTINE'S GIFT:</h3>
+            <p>A SHOPPING SPREE 🛍️</p>
+            <span>Hand-picked just for you!</span>
+        </div>
+        
+        <canvas id="scratch-canvas"></canvas>
+    </div>
+
+    <div id="successMessage">Yay! I hope you love it! ❤️</div>
+
+    <script>
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        const container = document.getElementById('scratch-container');
+
+        // Initialize Canvas size
+        function init() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            // Fill with Silver/Gold color
+            ctx.fillStyle = '#C0C0C0'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add some "texture" and text
+            ctx.fillStyle = '#888';
+            ctx.font = 'bold 20px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('SCRATCH HERE ✨', canvas.width/2, canvas.height/2 + 7);
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function scratch(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const { x, y } = getCoords(e);
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            checkScratch();
+        }
+
+        function checkScratch() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let count = 0;
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                if (imageData.data[i + 3] === 0) count++;
+            }
+            // If 40% is scratched, show the final message
+            if (count > (imageData.data.length / 4) * 0.4) {
+                document.getElementById('successMessage').style.display = 'block';
+            }
+        }
+
+        // Listeners for Mouse & Touch
+        canvas.addEventListener('mousedown', () => isDrawing = true);
+        canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
+        window.addEventListener('mouseup', () => isDrawing = false);
+        window.addEventListener('touchend', () => isDrawing = false);
+        canvas.addEventListener('mousemove', scratch);
+        canvas.addEventListener('touchmove', scratch);
+
+        window.onload = init;
+    </script>
+</body>
+</html>
