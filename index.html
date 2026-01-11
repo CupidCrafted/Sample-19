@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scratch for a Surprise! ✨</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #E0B0FF; /* Lilac */
+            font-family: 'Georgia', serif;
+            /* Prevents the phone from bouncing or scrolling while scratching */
+            touch-action: none; 
+            overflow: hidden;
+        }
+
+        h2 { color: white; margin-bottom: 20px; text-align: center; padding: 0 20px; }
+
+        #scratch-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 5px solid white;
+        }
+
+        /* THE GIFT UNDERNEATH */
+        #prize {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            z-index: 1;
+        }
+
+        #prize p { color: #D4AF37; font-weight: bold; font-size: 1.5rem; margin: 5px 0; }
+
+        /* THE SCRATCH CANVAS */
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        #revealed-msg {
+            margin-top: 25px;
+            color: white;
+            font-weight: bold;
+            display: none; /* Hidden until 40% is scratched */
+            animation: fadeIn 1s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <h2>Scratch with your finger! 👇</h2>
+
+    <div id="scratch-container">
+        <div id="prize">
+            <h3 style="color: #8A2BE2; margin:0;">YOU WON:</h3>
+            <p>A PRIVATE DINNER 🥂</p>
+            <small style="color: #999;">Valid: Feb 14, 2026</small>
+        </div>
+        <canvas id="scratch-canvas"></canvas>
+    </div>
+
+    <div id="revealed-msg">I love you! Enjoy your gift! ❤️</div>
+
+    <script>
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        let isDrawing = false;
+
+        function init() {
+            canvas.width = 300;
+            canvas.height = 200;
+
+            // Fill with Silver
+            ctx.fillStyle = '#C0C0C0';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Text on top of silver
+            ctx.fillStyle = '#777';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('SCRATCH HERE ✨', 150, 110);
+        }
+
+        function scratch(x, y) {
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            handlePercentage();
+        }
+
+        // Handle Touch (Mobile)
+        canvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            scratch(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            scratch(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+        }, { passive: false });
+
+        // Handle Mouse (PC)
+        canvas.addEventListener('mousedown', () => isDrawing = true);
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            scratch(e.clientX - rect.left, e.clientY - rect.top);
+        });
+        window.addEventListener('mouseup', () => isDrawing = false);
+
+        function handlePercentage() {
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let clearPixels = 0;
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i + 3] < 128) clearPixels++;
+            }
+            const percentage = (clearPixels / (canvas.width * canvas.height)) * 100;
+            
+            if (percentage > 40) {
+                document.getElementById('revealed-msg').style.display = 'block';
+                // Optional: Make the canvas disappear fully when mostly scratched
+                if (percentage > 80) canvas.style.display = 'none';
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
