@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scratch for a Surprise! ✨</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #E0B0FF; /* Lilac */
+            font-family: 'Georgia', serif;
+            touch-action: none; 
+            overflow: hidden;
+        }
+
+        h2 { color: white; margin-bottom: 20px; text-shadow: 1px 1px 4px rgba(0,0,0,0.2); }
+
+        #scratch-container {
+            position: relative;
+            width: 320px;
+            height: 200px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: 4px solid white;
+        }
+
+        #prize {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #fff;
+        }
+
+        #prize h3 { color: #8A2BE2; margin: 0; font-size: 1.1rem; }
+        #prize p { color: #D4AF37; font-weight: bold; font-size: 1.6rem; margin: 5px 0; }
+        #prize span { font-size: 0.9rem; color: #777; }
+
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        #successMessage {
+            display: none;
+            margin-top: 25px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: popIn 0.5s ease;
+        }
+
+        /* Back Button Styling */
+        .back-link {
+            margin-top: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+        .back-link:hover { opacity: 1; }
+
+        /* Brand Tag Styling */
+        .brand-tag { 
+            margin-top: 40px; 
+            font-size: 0.75rem; 
+            color: rgba(255,255,255,0.7); 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+        }
+        .brand-tag a { text-decoration: none; color: inherit; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Scratch to reveal your gift! ✨</h2>
+
+    <div id="scratch-container">
+        <div id="prize">
+            <h3>VALENTINE'S GIFT:</h3>
+            <p>A SHOPPING SPREE 🛍️</p>
+            <span>Hand-picked just for you!</span>
+        </div>
+        
+        <canvas id="scratch-canvas"></canvas>
+    </div>
+
+    <div id="successMessage">Yay! I hope you love it! ❤️</div>
+
+    <a href="javascript:history.back()" class="back-link">← Go Back</a>
+
+    <footer class="brand-tag">
+        <a href="https://wa.me/233XXXXXXXXX">Powered by CupidCrafted</a>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('scratch-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        const container = document.getElementById('scratch-container');
+
+        function init() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+            ctx.fillStyle = '#C0C0C0'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#888';
+            ctx.font = 'bold 20px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText('SCRATCH HERE ✨', canvas.width/2, canvas.height/2 + 7);
+        }
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function scratch(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const { x, y } = getCoords(e);
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            checkScratch();
+        }
+
+        function checkScratch() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let count = 0;
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                if (imageData.data[i + 3] === 0) count++;
+            }
+            if (count > (imageData.data.length / 4) * 0.4) {
+                document.getElementById('successMessage').style.display = 'block';
+            }
+        }
+
+        canvas.addEventListener('mousedown', () => isDrawing = true);
+        canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); });
+        window.addEventListener('mouseup', () => isDrawing = false);
+        window.addEventListener('touchend', () => isDrawing = false);
+        canvas.addEventListener('mousemove', scratch);
+        canvas.addEventListener('touchmove', scratch);
+
+        window.onload = init;
+    </script>
+</body>
+</html>
