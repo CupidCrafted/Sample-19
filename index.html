@@ -64,27 +64,7 @@
             display: none; /* Hidden until 40% is scratched */
             animation: fadeIn 1s;
         }
-<!-- Floating Go Back Button -->
-<a href="https://cupidcrafted.github.io/" style="
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 12px 25px;
-    background-color: #d9b6f2; /* soft pastel purple */
-    color: #4a1a4a;
-    text-decoration: none;
-    border-radius: 12px;
-    font-family: 'Lato', sans-serif;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: 0.3s;
-    z-index: 9999;
-"
-onmouseover="this.style.backgroundColor='#c999e6'; this.style.transform='translateX(-50%) scale(1.05)';"
-onmouseout="this.style.backgroundColor='#d9b6f2'; this.style.transform='translateX(-50%) scale(1)';">
-    ← Go Back
-</a>
+        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
@@ -170,6 +150,37 @@ onmouseout="this.style.backgroundColor='#d9b6f2'; this.style.transform='translat
         }
 
         init();
+        <!-- Floating Go Back Button -->
+<script>
+  const goBackBtn = document.createElement('a');
+  goBackBtn.href = 'https://cupidcrafted.github.io/';
+  goBackBtn.innerText = '← Go Back';
+  goBackBtn.style.position = 'fixed';
+  goBackBtn.style.bottom = '20px';
+  goBackBtn.style.left = '50%';
+  goBackBtn.style.transform = 'translateX(-50%)';
+  goBackBtn.style.padding = '12px 25px';
+  goBackBtn.style.backgroundColor = '#d9b6f2';
+  goBackBtn.style.color = '#4a1a4a';
+  goBackBtn.style.textDecoration = 'none';
+  goBackBtn.style.borderRadius = '12px';
+  goBackBtn.style.fontFamily = 'Lato, sans-serif';
+  goBackBtn.style.fontWeight = 'bold';
+  goBackBtn.style.boxShadow = '0 4px 10px rgba(0,0,0,0.1)';
+  goBackBtn.style.transition = '0.3s';
+  goBackBtn.style.zIndex = '9999';
+  goBackBtn.onmouseover = () => {
+      goBackBtn.style.backgroundColor = '#c999e6';
+      goBackBtn.style.transform = 'translateX(-50%) scale(1.05)';
+  };
+  goBackBtn.onmouseout = () => {
+      goBackBtn.style.backgroundColor = '#d9b6f2';
+      goBackBtn.style.transform = 'translateX(-50%) scale(1)';
+  };
+  document.body.appendChild(goBackBtn);
+</script>
+</body>
+</html>
     </script>
 </body>
 </html>
